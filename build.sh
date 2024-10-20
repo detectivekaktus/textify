@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
 CC="gcc"
 CFLAGS="-Wall -Wextra -std=c99 -pedantic -ggdb"
-SRCS=("src/main.c")
-OBJS=("main.o")
+SRCS=("src/main.c" "src/renderer.c")
+OBJS=("bin/main.o" "bin/renderer.o")
 
-BDIR="bin"
 EXEC="textify"
 
 build() {
-  mkdir -p $BDIR
+  mkdir -p bin/
   for i in "${!SRCS[@]}"; do
-    $CC $CFLAGS -c "${SRCS[$i]}" -o $BDIR/"${OBJS[$i]}"
+    $CC $CFLAGS -c "${SRCS[$i]}" -o "${OBJS[$i]}"
   done
-  $CC $CFLAGS $BDIR/$OBJS -o $EXEC
+  $CC $CFLAGS "${OBJS[@]}" -o $EXEC
 }
 
 clean() {
@@ -22,8 +21,8 @@ clean() {
     echo "No executable found. Skipped..."
   fi
 
-  if [ -d "$BDIR" ]; then
-    rm -r $BDIR
+  if [ -d "bin" ]; then
+    rm -r bin
   else
     echo "No \`bin\` directory found. Skipped..."
   fi
