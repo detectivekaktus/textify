@@ -42,31 +42,27 @@ int render_md(char *filename)
   char *content = read_entire_file(filename);
   size_t cur = 0;
   while (cur != strlen(content) + 1) {
-    int c = content[cur];
-    switch (c) {
+    switch (content[cur]) {
       case '#': {
-        c = content[cur++];
+        cur++;
         // Invalid syntax. No space between # and header.
-        if (c != ' ' && c != '#') {
+        if (content[cur] != ' ' && content[cur] != '#') {
           putchar('#');
-          while (c != '\n') {
-            c = content[cur++];
-            putchar(c);
+          while (content[cur] != '\n') {
+            putchar(content[cur]);
+            cur++;
           }
+          break;
         }
-        else if (c == '#') {
+        else if (content[cur] == '#') {
           unsigned char level = 0;
-          while (c == '#') {
-            level++;
-            c = content[cur++];
-          }
+          while (content[cur] == '#') { level++; cur++; }
           // Invalid syntax. No space between # and header.
-          if (c != ' ') {
+          if (content[cur] != ' ') {
             for (unsigned char i = 0; i < level; i++) putchar('#');
-            putchar(c);
-            while (c != '\n') {
-              c = content[cur++];
-              putchar(c);
+            while (content[cur] != '\n') {
+              putchar(content[cur]);
+              cur++;
             }
             break;
           }
@@ -74,23 +70,73 @@ int render_md(char *filename)
           else if (level > 6) {
             for (unsigned char i = 0; i < level; i++) putchar('#');
             putchar(' ');
-            while (c != '\n') {
-              c = content[cur++];
-              putchar(c);
+            while (content[cur] != '\n') {
+              putchar(content[cur]);
+              cur++;
             }
             break;
           }
         }
 
         bold();
-        while (c != '\n') {
-          c = content[cur++];
-          putchar(toupper(c));
+        cur++;
+        while (content[cur] != '\n') {
+          putchar(toupper(content[cur]));
+          cur++;
         }
         reset();
       } break;
+
+      case '*': {
+        cur++;
+        // Bold.
+        if (content[cur] == '*') {
+          size_t start = ++cur;
+          while (content[cur] != '\0' && content[cur] != '\n' && content[cur] != '*') cur++;
+          // Invalid syntax. Bold must be closed by a pair of *. Render italic instead.
+          if (content[++cur] != '*') {
+            putchar('*');
+            italic();
+            cur = start;
+            while (content[cur] != '*') {
+              putchar(content[cur]);
+              cur++;
+            }
+            reset();
+            cur++;
+            break;
+          }
+          bold();
+          cur = start;
+          while (content[cur] != '*') {
+            putchar(content[cur]);
+            cur++;
+          }
+          reset();
+          cur++;
+        }
+        // Italic.
+        else {
+          size_t start = cur;
+          while (content[cur] != '\0' && content[cur] != '\n' && content[cur] != '*') cur++;
+          // A simple dot.
+          if (content[cur] == '\0' || content[cur] == '\n') {
+            cur = start;
+            putchar('*');
+            break;
+          }
+          italic();
+          cur = start;
+          while (content[cur] != '*') {
+            putchar(content[cur]);
+            cur++;
+          }
+          reset();
+          cur++;
+        }
+      } break;
       default: {
-        putchar(c);
+        putchar(content[cur]);
         cur++;
       }
     }
