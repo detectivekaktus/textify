@@ -104,7 +104,7 @@ int render_md(char *filename)
             default: { assert(0 && "Unreachable"); }
           }
         }
-        if (start_stars == 1 && end_stars == 0) putchar('*');
+        if (start_stars == 1 && end_stars == 0) fputs("  *", stdout);
         size_t end = cur;
         cur = start;
         while (cur != end - end_stars) { putchar(content[cur]); cur++; }
@@ -120,6 +120,10 @@ int render_md(char *filename)
       case '1': case '2': case '3': case '4': case '5':
       case '6': case '7': case '8': case '9': case '0': {
         if (content[cur + 1] == '.') { fputs("  ", stdout); putchar(content[cur++]); }
+      } break;
+
+      case '-': case '+': {
+        if (content[cur + 1] == ' ') { fputs("  ", stdout); putchar('*'); cur++; }
       } break;
 
       default: {

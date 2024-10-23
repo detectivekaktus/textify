@@ -8,3 +8,16 @@ Some text before the list.
  1. Huh?
  2. Yup...
 3. Something...
+
+* An unordered
+* List
+* Is being created
+
++ A new list
++ With pluses
++ Is also here
+
+- I see
+ - Only
+ - Minuses
+- Here
