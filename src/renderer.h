@@ -1,6 +1,7 @@
 #ifndef TXTFY_RENDERER
 #define TXTFY_RENDERER
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>

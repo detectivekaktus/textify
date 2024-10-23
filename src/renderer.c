@@ -87,53 +87,29 @@ int render_md(char *filename)
         reset();
       } break;
 
+      case '_':
       case '*': {
-        cur++;
-        // Bold.
-        if (content[cur] == '*') {
-          size_t start = ++cur;
-          while (content[cur] != '\0' && content[cur] != '\n' && content[cur] != '*') cur++;
-          // Invalid syntax. Bold must be closed by a pair of *. Render italic instead.
-          if (content[++cur] != '*') {
-            putchar('*');
-            italic();
-            cur = start;
-            while (content[cur] != '*') {
-              putchar(content[cur]);
-              cur++;
-            }
-            reset();
-            cur++;
-            break;
+        unsigned char start_stars = 0;
+        while ((content[cur] == '*' || content[cur] == '_') && content[cur] != '\n' && content[cur] != '\0') { start_stars++; cur++; }
+        size_t start = cur;
+        while ((content[cur] != '*' && content[cur] != '_') && content[cur] != '\n' && content[cur] != '\0') cur++;
+        unsigned char end_stars = 0;
+        while ((content[cur] == '*' || content[cur] == '_') && content[cur] != '\n' && content[cur] != '\0') { end_stars++; cur++; }
+        if (start_stars == end_stars) {
+          switch (end_stars) {
+            case 0: break;
+            case 1: { italic(); } break;
+            case 2: { bold(); } break;
+            case 3: { italic(); bold(); } break;
+            default: { assert(0 && "Unreachable"); }
           }
-          bold();
-          cur = start;
-          while (content[cur] != '*') {
-            putchar(content[cur]);
-            cur++;
-          }
-          reset();
-          cur++;
         }
-        // Italic.
-        else {
-          size_t start = cur;
-          while (content[cur] != '\0' && content[cur] != '\n' && content[cur] != '*') cur++;
-          // A simple dot.
-          if (content[cur] == '\0' || content[cur] == '\n') {
-            cur = start;
-            putchar('*');
-            break;
-          }
-          italic();
-          cur = start;
-          while (content[cur] != '*') {
-            putchar(content[cur]);
-            cur++;
-          }
-          reset();
-          cur++;
-        }
+        if (start_stars == 1 && end_stars == 0) putchar('*');
+        size_t end = cur;
+        cur = start;
+        while (cur != end - end_stars) { putchar(content[cur]); cur++; }
+        reset();
+        cur = end;
       } break;
       default: {
         putchar(content[cur]);
