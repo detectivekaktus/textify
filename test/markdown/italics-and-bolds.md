@@ -8,3 +8,7 @@
 ***This is a bold italic string***
 ****This is an invalid bold italic string***
 ***This is also an invalid bold italic string****
+
+_Italic string_
+__Bold string__
+___Bold italic string___

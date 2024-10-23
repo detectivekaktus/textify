@@ -111,6 +111,12 @@ int render_md(char *filename)
         reset();
         cur = end;
       } break;
+
+      case '>': {
+        cur++;
+        fputs(" |", stdout);
+      } break;
+
       default: {
         putchar(content[cur]);
         cur++;
