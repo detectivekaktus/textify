@@ -123,7 +123,25 @@ int render_md(char *filename)
       } break;
 
       case '-': case '+': {
-        if (content[cur + 1] == ' ') { fputs("  ", stdout); putchar('*'); cur++; }
+        if (content[cur + 1] == ' ') { fputs("  *", stdout); cur++; }
+      } break;
+
+      case '`': {
+        size_t start = ++cur;
+        while (content[cur] != '`' && content[cur] != '\n' && content[cur] != '\0') cur++;
+        if (content[cur] != '`') {
+          cur = start;
+          putchar('`');
+          break;
+        }
+        cur = start;
+        reverse();
+        while (content[cur] != '`') {
+          putchar(content[cur]);
+          cur++;
+        }
+        reset();
+        cur++;
       } break;
 
       default: {
