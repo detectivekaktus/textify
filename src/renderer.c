@@ -45,45 +45,29 @@ int render_md(char *filename)
     switch (content[cur]) {
       case '#': {
         cur++;
-        // Invalid syntax. No space between # and header.
         if (content[cur] != ' ' && content[cur] != '#') {
           putchar('#');
-          while (content[cur] != '\n') {
-            putchar(content[cur]);
-            cur++;
-          }
+          while (content[cur] != '\n') putchar(content[cur++]);
           break;
         }
         else if (content[cur] == '#') {
           unsigned char level = 0;
           while (content[cur] == '#') { level++; cur++; }
-          // Invalid syntax. No space between # and header.
           if (content[cur] != ' ') {
             for (unsigned char i = 0; i < level; i++) putchar('#');
-            while (content[cur] != '\n') {
-              putchar(content[cur]);
-              cur++;
-            }
+            while (content[cur] != '\n') putchar(content[cur++]);
             break;
           }
-          // Invalid syntax. There are only 6 header levels in markdown.
           else if (level > 6) {
             for (unsigned char i = 0; i < level; i++) putchar('#');
             putchar(' ');
-            while (content[cur] != '\n') {
-              putchar(content[cur]);
-              cur++;
-            }
+            while (content[cur] != '\n') putchar(content[cur++]);
             break;
           }
         }
-
         bold();
         cur++;
-        while (content[cur] != '\n') {
-          putchar(toupper(content[cur]));
-          cur++;
-        }
+        while (content[cur] != '\n') putchar(toupper(content[cur++]));
         reset();
       } break;
 
@@ -107,7 +91,7 @@ int render_md(char *filename)
         if (start_stars == 1 && end_stars == 0) fputs("  *", stdout);
         size_t end = cur;
         cur = start;
-        while (cur != end - end_stars) { putchar(content[cur]); cur++; }
+        while (cur != end - end_stars) putchar(content[cur++]);
         reset();
         cur = end;
       } break;
@@ -142,10 +126,7 @@ int render_md(char *filename)
         if (start_tildas == end_tildas) { 
           cur = start;
           reverse();
-          while (content[cur] != '`') {
-            putchar(content[cur]);
-            cur++;
-          }
+          while (content[cur] != '`') putchar(content[cur++]);
           reset();
           cur += end_tildas;
         }
