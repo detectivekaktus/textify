@@ -26,5 +26,7 @@
 
 int render(char *filename);
 int render_md(char *filename);
+int render_html(char *filename);
+int render_txt(char *filename);
 
 #endif

@@ -2,9 +2,6 @@
 
 const char *get_file_extension(char *filename)
 {
-  // From man page:
-  // The strrchr() function returns a pointer to the last
-  // ouprence of the character c in the string s.
   const char *dot = strrchr(filename, '.');
   if (!dot || dot == filename) return "";
   return dot + 1;
@@ -34,6 +31,10 @@ int render(char *filename)
 {
   const char *fext = get_file_extension(filename);
   if (strcmp(fext, "md") == 0) return render_md(filename);
+  if (strcmp(fext, "html") == 0) return render_html(filename);
+  if (strcmp(fext, "txt") == 0) return render_txt(filename);
+  if (strcmp(fext, "json") == 0) return render_txt(filename);
+  if (strcmp(fext, "xml") == 0) return render_txt(filename);
   else return 1;
 }
 
@@ -171,6 +172,30 @@ int render_md(char *filename)
     }
   }
   putchar('\n');
+  free(content);
+  content = NULL;
+  return 0;
+}
+
+int render_html(char *filename)
+{
+  char *content = read_entire_file(filename);
+  size_t up = 0;
+  size_t col = 0;
+  size_t line = 0;
+  while (up != strlen(content) + 1) {
+    putchar(content[up++]);
+  }
+  putchar('\n');
+  free(content);
+  content = NULL;
+  return 0;
+}
+
+int render_txt(char *filename)
+{
+  char *content = read_entire_file(filename);
+  printf("%s\n", content);
   free(content);
   content = NULL;
   return 0;
