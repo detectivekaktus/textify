@@ -4,7 +4,7 @@ const char *get_file_extension(char *filename)
 {
   // From man page:
   // The strrchr() function returns a pointer to the last
-  // ocurrence of the character c in the string s.
+  // ouprence of the character c in the string s.
   const char *dot = strrchr(filename, '.');
   if (!dot || dot == filename) return "";
   return dot + 1;
@@ -40,45 +40,47 @@ int render(char *filename)
 int render_md(char *filename)
 {
   char *content = read_entire_file(filename);
-  size_t cur = 0;
-  while (cur != strlen(content) + 1) {
-    switch (content[cur]) {
+  size_t up = 0;
+  size_t col = 0;
+  size_t line = 0;
+  while (up != strlen(content) + 1) {
+    switch (content[up]) {
       case '#': {
-        cur++;
-        if (content[cur] != ' ' && content[cur] != '#') {
+        up++;
+        if (content[up] != ' ' && content[up] != '#') {
           putchar('#');
-          while (content[cur] != '\n') putchar(content[cur++]);
+          while (content[up] != '\n') putchar(content[up++]);
           break;
         }
-        else if (content[cur] == '#') {
+        else if (content[up] == '#') {
           unsigned char level = 0;
-          while (content[cur] == '#') { level++; cur++; }
-          if (content[cur] != ' ') {
+          while (content[up] == '#') { level++; up++; }
+          if (content[up] != ' ') {
             for (unsigned char i = 0; i < level; i++) putchar('#');
-            while (content[cur] != '\n') putchar(content[cur++]);
+            while (content[up] != '\n') putchar(content[up++]);
             break;
           }
           else if (level > 6) {
             for (unsigned char i = 0; i < level; i++) putchar('#');
             putchar(' ');
-            while (content[cur] != '\n') putchar(content[cur++]);
+            while (content[up] != '\n') putchar(content[up++]);
             break;
           }
         }
         bold();
-        cur++;
-        while (content[cur] != '\n') putchar(toupper(content[cur++]));
+        up++;
+        while (content[up] != '\n') putchar(toupper(content[up++]));
         reset();
       } break;
 
       case '_':
       case '*': {
         unsigned char start_stars = 0;
-        while ((content[cur] == '*' || content[cur] == '_') && content[cur] != '\n' && content[cur] != '\0') { start_stars++; cur++; }
-        size_t start = cur;
-        while ((content[cur] != '*' && content[cur] != '_') && content[cur] != '\n' && content[cur] != '\0') cur++;
+        while ((content[up] == '*' || content[up] == '_') && content[up] != '\n' && content[up] != '\0') { start_stars++; up++; }
+        size_t start = up;
+        while ((content[up] != '*' && content[up] != '_') && content[up] != '\n' && content[up] != '\0') up++;
         unsigned char end_stars = 0;
-        while ((content[cur] == '*' || content[cur] == '_') && content[cur] != '\n' && content[cur] != '\0') { end_stars++; cur++; }
+        while ((content[up] == '*' || content[up] == '_') && content[up] != '\n' && content[up] != '\0') { end_stars++; up++; }
         if (start_stars == end_stars) {
           switch (end_stars) {
             case 0: break;
@@ -89,81 +91,86 @@ int render_md(char *filename)
           }
         }
         if (start_stars == 1 && end_stars == 0) fputs("  *", stdout);
-        size_t end = cur;
-        cur = start;
-        while (cur != end - end_stars) putchar(content[cur++]);
+        size_t end = up;
+        up = start;
+        while (up != end - end_stars) putchar(content[up++]);
         reset();
-        cur = end;
+        up = end;
       } break;
 
       case '>': {
-        cur++;
-        fputs(" |", stdout);
+        if (col == 0) {
+          up++;
+          fputs(" |", stdout);
+        }
+        putchar(content[up++]);
       } break;
 
       case '1': case '2': case '3': case '4': case '5':
       case '6': case '7': case '8': case '9': case '0': {
-        if (content[cur + 1] == '.') { fputs("  ", stdout); putchar(content[cur++]); }
+        if (content[up + 1] == '.' && col == 0) { fputs("  ", stdout); putchar(content[up++]); }
+        putchar(content[up++]);
       } break;
 
       case '-': case '+': {
-        if (content[cur + 1] == ' ') { fputs("  *", stdout); cur++; }
+        if (content[up + 1] == ' ' && col == 0) { fputs("  *", stdout); up++; }
+        putchar(content[up++]);
       } break;
 
       case '`': {
         unsigned char start_tildas = 0;
-        while (content[cur] == '`' && content[cur] != '\n' && content[cur] != '\0') { start_tildas++; cur++; }
-        size_t start = cur;
-        while (content[cur] != '`' && content[cur] != '\n' && content[cur] != '\0') cur++;
+        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { start_tildas++; up++; }
+        size_t start = up;
+        while (content[up] != '`' && content[up] != '\n' && content[up] != '\0') up++;
         unsigned char end_tildas = 0;
-        while (content[cur] == '`' && content[cur] != '\n' && content[cur] != '\0') { end_tildas++; cur++; }
+        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { end_tildas++; up++; }
         if (start_tildas == 1 && end_tildas == 0) {
-          cur = start;
+          up = start;
           putchar('`');
-          putchar(content[cur++]);
+          putchar(content[up++]);
           break;
         }
         if (start_tildas == end_tildas) { 
-          cur = start;
+          up = start;
           reverse();
-          while (content[cur] != '`') putchar(content[cur++]);
+          while (content[up] != '`') putchar(content[up++]);
           reset();
-          cur += end_tildas;
+          up += end_tildas;
         }
       } break;
 
       case '[': {
-        size_t name_start = ++cur;
-        while (content[cur] != ']' && content[cur] != '\n' && content[cur] != '\0') cur++;
-        if (content[++cur] != '(') {
-          cur = --name_start;
-          putchar(content[cur++]);
+        size_t name_start = ++up;
+        while (content[up] != ']' && content[up] != '\n' && content[up] != '\0') up++;
+        if (content[++up] != '(') {
+          up = --name_start;
+          putchar(content[up++]);
           break;
         }
-        size_t name_end = cur - 1;
-        size_t link_start = ++cur;
-        while (content[cur] != ')' && content[cur] != '\n' && content[cur] != '\0') cur++;
-        size_t link_end = cur;
+        size_t name_end = up - 1;
+        size_t link_start = ++up;
+        while (content[up] != ')' && content[up] != '\n' && content[up] != '\0') up++;
+        size_t link_end = up;
 
         italic();
         underline();
-        cur = name_start;
-        while (cur != name_end) putchar(content[cur++]);
+        up = name_start;
+        while (up != name_end) putchar(content[up++]);
         reset();
         
         fputs(" (", stdout);
-        cur = link_start;
-        while (cur != link_end) putchar(content[cur++]);
+        up = link_start;
+        while (up != link_end) putchar(content[up++]);
         putchar(')');
-        cur++;
+        up++;
       } break;
 
-      default: {
-        putchar(content[cur]);
-        cur++;
-      } break;
+      case '\n': { col = 0; line++; putchar(content[up++]); } break;
+
+      default: { putchar(content[up++]); } break;
     }
   }
+  putchar('\n');
   free(content);
   content = NULL;
   return 0;
