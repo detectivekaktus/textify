@@ -127,21 +127,28 @@ int render_md(char *filename)
       } break;
 
       case '`': {
-        size_t start = ++cur;
+        unsigned char start_tildas = 0;
+        while (content[cur] == '`' && content[cur] != '\n' && content[cur] != '\0') { start_tildas++; cur++; }
+        size_t start = cur;
         while (content[cur] != '`' && content[cur] != '\n' && content[cur] != '\0') cur++;
-        if (content[cur] != '`') {
+        unsigned char end_tildas = 0;
+        while (content[cur] == '`' && content[cur] != '\n' && content[cur] != '\0') { end_tildas++; cur++; }
+        if (start_tildas == 1 && end_tildas == 0) {
           cur = start;
           putchar('`');
+          putchar(content[cur++]);
           break;
         }
-        cur = start;
-        reverse();
-        while (content[cur] != '`') {
-          putchar(content[cur]);
-          cur++;
+        if (start_tildas == end_tildas) { 
+          cur = start;
+          reverse();
+          while (content[cur] != '`') {
+            putchar(content[cur]);
+            cur++;
+          }
+          reset();
+          cur += end_tildas;
         }
-        reset();
-        cur++;
       } break;
 
       default: {
