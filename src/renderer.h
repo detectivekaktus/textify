@@ -22,6 +22,15 @@
 #define hide() fputs("\033[8m", stdout);
 #define strikethrough() fputs("\033[9m", stdout);
 
+#define black() fputs("\033[30m", stdout)
+#define red() fputs("\033[31m", stdout)
+#define green() fputs("\033[32m", stdout)
+#define yellow() fputs("\033[33m", stdout)
+#define blue() fputs("\033[34m", stdout)
+#define magenta() fputs("\033[35m", stdout)
+#define cyan() fputs("\033[36m", stdout)
+#define white() fputs("\033[37m", stdout)
+
 #define reset() fputs("\033[0m", stdout);
 
 int render(char *filename);

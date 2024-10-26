@@ -47,6 +47,7 @@ int render_md(char *filename)
   while (up != strlen(content) + 1) {
     switch (content[up]) {
       case '#': {
+        unsigned char level = 1;
         up++;
         if (content[up] != ' ' && content[up] != '#') {
           putchar('#');
@@ -54,7 +55,6 @@ int render_md(char *filename)
           break;
         }
         else if (content[up] == '#') {
-          unsigned char level = 0;
           while (content[up] == '#') { level++; up++; }
           if (content[up] != ' ') {
             for (unsigned char i = 0; i < level; i++) putchar('#');
@@ -67,6 +67,11 @@ int render_md(char *filename)
             while (content[up] != '\n') putchar(content[up++]);
             break;
           }
+        }
+        switch (level) {
+          case 1: case 4: { red(); } break;
+          case 2: case 5: { magenta(); } break;
+          case 3: case 6: { yellow(); } break;
         }
         bold();
         up++;
@@ -91,7 +96,7 @@ int render_md(char *filename)
             default: { assert(0 && "Unreachable"); }
           }
         }
-        if (start_stars == 1 && end_stars == 0) fputs("  *", stdout);
+        if (start_stars == 1 && end_stars == 0) { cyan(); fputs("  *", stdout); reset(); }
         size_t end = up;
         up = start;
         while (up != end - end_stars) putchar(content[up++]);
@@ -100,43 +105,67 @@ int render_md(char *filename)
       } break;
 
       case '>': {
-        if (col == 0) {
+        if (content[up - 1] != '\\') {
+          cyan();
           up++;
           fputs(" |", stdout);
+          reset();
         }
-        putchar(content[up++]);
+        else putchar(content[up++]);
       } break;
 
       case '1': case '2': case '3': case '4': case '5':
       case '6': case '7': case '8': case '9': case '0': {
-        if (content[up + 1] == '.' && col == 0) { fputs("  ", stdout); putchar(content[up++]); }
+        if (content[up + 1] == '.' && col == 0) { cyan(); fputs("  ", stdout); putchar(content[up++]); reset(); }
         putchar(content[up++]);
       } break;
 
       case '-': case '+': {
-        if (content[up + 1] == ' ' && col == 0) { fputs("  *", stdout); up++; }
+        if (content[up + 1] == ' ' && col == 0) { cyan(); fputs("  *", stdout); up++; reset(); }
         putchar(content[up++]);
       } break;
 
       case '`': {
-        unsigned char start_tildas = 0;
-        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { start_tildas++; up++; }
+        unsigned char start_backticks = 0;
+        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { start_backticks++; up++; }
         size_t start = up;
         while (content[up] != '`' && content[up] != '\n' && content[up] != '\0') up++;
-        unsigned char end_tildas = 0;
-        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { end_tildas++; up++; }
-        if (start_tildas == 1 && end_tildas == 0) {
+        unsigned char end_backticks = 0;
+        while (content[up] == '`' && content[up] != '\n' && content[up] != '\0') { end_backticks++; up++; }
+        if (start_backticks == 1 && end_backticks == 0) {
           up = start;
           putchar('`');
           putchar(content[up++]);
           break;
         }
-        if (start_tildas == end_tildas) { 
+        if (start_backticks == end_backticks) { 
           up = start;
           reverse();
           while (content[up] != '`') putchar(content[up++]);
           reset();
+          up += end_backticks;
+        }
+      } break;
+
+      case '~': {
+        unsigned char start_tildas = 0;
+        while (content[up] == '~' && content[up] != '\n' && content[up] != '\0') { start_tildas++; up++; }
+        size_t start = up;
+        while (content[up] != '~' && content[up] != '\n' && content[up] != '\0') up++;
+        unsigned char end_tildas = 0;
+        while (content[up] == '~' && content[up] != '\n' && content[up] != '\0') { end_tildas++; up++; }
+        if (start_tildas == end_tildas && start_tildas > 0 && start_tildas < 3) {
+          strikethrough();
+          up = start;
+          while (content[up] != '~') putchar(content[up++]);
+          reset();
           up += end_tildas;
+        }
+        else {
+          size_t end = up;
+          up = start;
+          for (unsigned char i = 0; i < start_tildas; i++) putchar('~');
+          while (up != end) putchar(content[up++]);
         }
       } break;
 
@@ -160,8 +189,10 @@ int render_md(char *filename)
         reset();
         
         fputs(" (", stdout);
+        blue();
         up = link_start;
         while (up != link_end) putchar(content[up++]);
+        reset();
         putchar(')');
         up++;
       } break;
