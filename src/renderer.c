@@ -151,6 +151,32 @@ int render_md(char *filename)
         }
       } break;
 
+      case '[': {
+        size_t name_start = ++cur;
+        while (content[cur] != ']' && content[cur] != '\n' && content[cur] != '\0') cur++;
+        if (content[++cur] != '(') {
+          cur = --name_start;
+          putchar(content[cur++]);
+          break;
+        }
+        size_t name_end = cur - 1;
+        size_t link_start = ++cur;
+        while (content[cur] != ')' && content[cur] != '\n' && content[cur] != '\0') cur++;
+        size_t link_end = cur;
+
+        italic();
+        underline();
+        cur = name_start;
+        while (cur != name_end) putchar(content[cur++]);
+        reset();
+        
+        fputs(" (", stdout);
+        cur = link_start;
+        while (cur != link_end) putchar(content[cur++]);
+        putchar(')');
+        cur++;
+      } break;
+
       default: {
         putchar(content[cur]);
         cur++;
