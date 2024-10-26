@@ -1,5 +1,0 @@
-~Strike~
-~~Strike~~
-
-~~~Strike~~~
-~~~~Strike~~~~
