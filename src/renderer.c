@@ -32,10 +32,7 @@ int render(char *filename)
   const char *fext = get_file_extension(filename);
   if (strcmp(fext, "md") == 0) return render_md(filename);
   if (strcmp(fext, "html") == 0) return render_html(filename);
-  if (strcmp(fext, "txt") == 0) return render_txt(filename);
-  if (strcmp(fext, "json") == 0) return render_txt(filename);
-  if (strcmp(fext, "xml") == 0) return render_txt(filename);
-  else return 1;
+  else return render_txt(filename);
 }
 
 int render_md(char *filename)
