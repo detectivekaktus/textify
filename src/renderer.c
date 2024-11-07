@@ -209,10 +209,17 @@ int render_html(char *filename)
 {
   char *content = read_entire_file(filename);
   size_t up = 0;
-  size_t col = 0;
-  size_t line = 0;
   while (up != strlen(content) + 1) {
-    putchar(content[up++]);
+    Html_Tag tag = consume_tag(content, up);
+    switch (tag.type) {
+      case NONE: {
+        printf("%s", tag.content);
+      } break;
+
+      default {
+        assert(0 && "Unreachable");
+      } break;
+    }
   }
   putchar('\n');
   free(content);

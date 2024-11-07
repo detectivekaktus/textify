@@ -35,7 +35,24 @@
 
 int render(char *filename);
 int render_md(char *filename);
-int render_html(char *filename);
 int render_txt(char *filename);
+
+typedef enum {
+  HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
+
+  NONE
+} Tag_Type;
+
+typedef struct {
+  Tag_Type type;
+  char *content;
+  bool autocomplete;
+} Html_Tag;
+
+#define consume_tag(content, up)  \
+  do {                            \
+ } while (0);                     \
+
+int render_html(char *filename);
 
 #endif
