@@ -205,28 +205,62 @@ int render_md(char *filename)
   return 0;
 }
 
+const struct Html_Tag_Property props[] = {
+  {"h1", HEADER1, true},
+  {"h2", HEADER2, true},
+  {"h3", HEADER3, true},
+  {"h4", HEADER4, true},
+  {"h5", HEADER5, true},
+  {"h6", HEADER6, true},
+};
+
+void resolve_tag(const char *name, Html_Tag *tag)
+{
+  if (name[0] == '/') name++;
+  for (size_t i = 0; i < sizeof(props) / sizeof(props[0]); i++) {
+    if (strcmp(name, props[i].name) == 0) {
+      tag->type = props[i].type;
+      tag->autocomplete = props[i].autocomplete;
+      return;
+    }
+  }
+  tag->type = (Tag_Type)UNKNOWN;
+}
+
 Tags *parse_html(char *filename)
 {
   Tags *tags = da_heap_alloc(Tags);
   char *content = read_entire_file(filename);
   size_t up = 0;
-  while (up != strlen(content) + 1) {
+  while (up != strlen(content)) {
     switch (content[up]) {
-      default: {
+      case '<': {
+        up++;
+        CString str = {0};
+        while (content[up] != '\0' && content[up] != '>') da_append(&str, content[up++]);
+        da_append(&str, '\0');
+
         Html_Tag tag = {0};
-        size_t start = up;
-        while (content[up] != '\0' && content[up] != '<') up++;
+        resolve_tag(str.items, &tag);
+        if (tag.type == UNKNOWN) CRASH("Unknown tag found during parsing.\n");
+        tag.closing = str.items[0] == '/';
+        da_append(tags, tag);
+        up++;
+      } break;
+
+      default: {
+        CString str = {0};
+        while (content[up] != '\0' && content[up] != '<') da_append(&str, content[up++]);
+        da_append(&str, '\0');
+
+        Html_Tag tag = {0};
         tag.type = NONE;
         tag.autocomplete = false;
-        size_t len = up - start;
-        char *ctn = malloc(len + 1);
-        strncpy(ctn, content + start, len);
-        ctn[len] = '\0';
-        tag.content = ctn;
+        tag.content = str.items;
+        tag.closing = false;
         da_append(tags, tag);
       } break;
     }
-    up++;
   }
   free(content);
   content = NULL;
@@ -235,8 +269,52 @@ Tags *parse_html(char *filename)
 
 int render_html(Tags *tags)
 {
-  printf("%s", tags->items[0].content);
-  destroy_tags(tags);
+  size_t up = 0;
+  while (up != tags->size) {
+    switch (tags->items[up].type) {
+      case NONE: {
+        printf("%s", tags->items[up].content);
+        up++;
+      } break;
+
+      case HEADER1: case HEADER4: {
+        red();
+        bold();
+        while ((tags->items[up].type != HEADER1 || tags->items[up].type != HEADER4) && !tags->items[up].closing) {
+          if (tags->items[up].content == NULL) { up++; continue; }
+          printf("%s", tags->items[up++].content);
+        }
+        reset();
+        up++;
+      } break;
+
+      case HEADER2: case HEADER5: {
+        magenta();
+        bold();
+        while ((tags->items[up].type != HEADER2 || tags->items[up].type != HEADER5) && !tags->items[up].closing) {
+          if (tags->items[up].content == NULL) { up++; continue; }
+          printf("%s", tags->items[up++].content);
+        }
+        reset();
+        up++;
+      } break;
+
+      case HEADER3: case HEADER6: {
+        yellow();
+        bold();
+        while ((tags->items[up].type != HEADER3 || tags->items[up].type != HEADER6) && !tags->items[up].closing) {
+          if (tags->items[up].content == NULL) { up++; continue; }
+          printf("%s", tags->items[up++].content);
+        }
+        reset();
+        up++;
+      } break;
+
+      default: {
+        assert(0 && "Unreachable");
+      } break;
+    }
+  }
   da_heap_free(tags);
   return 0;
 }

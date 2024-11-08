@@ -41,13 +41,15 @@ int render_txt(char *filename);
 typedef enum {
   HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
 
-  NONE
+  NONE,
+  UNKNOWN
 } Tag_Type;
 
 typedef struct {
   Tag_Type type;
   char *content;
   bool autocomplete;
+  bool closing;
 } Html_Tag;
 
 typedef struct {
@@ -55,6 +57,12 @@ typedef struct {
   size_t size;
   size_t capacity;
 } Tags;
+
+struct Html_Tag_Property {
+  const char *name;
+  Tag_Type type;
+  bool autocomplete;
+};
 
 #define DA_INIT_CAPACITY 64
 #define da_heap_alloc(type) (type*) calloc(1, sizeof(type))
@@ -79,6 +87,12 @@ typedef struct {
   char *items;
   size_t size;
   size_t capacity;
+} CString;
+
+typedef struct {
+  char *items;
+  size_t size;
+  size_t capacity;
 } CString_Builder;
 
 #define sb_append_str(sb, str)                                                        \
@@ -93,9 +107,6 @@ typedef struct {
     for (int i = 0; i < strlen(str) + 1; i++)                                         \
       (sb)->items[(sb)->size++] = str[i];                                             \
   } while (0)
-
-#define destroy_tag(tag) free((tag)->content);
-#define destroy_tags(tags) for (size_t i = 0; i < (tags)->size; i++) destroy_tag(&(tags)->items[i]); \
 
 Tags *parse_html(char *filename);
 int render_html(Tags *tags);
