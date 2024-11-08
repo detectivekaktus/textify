@@ -31,7 +31,7 @@ int render(char *filename)
 {
   const char *fext = get_file_extension(filename);
   if (strcmp(fext, "md") == 0) return render_md(filename);
-  if (strcmp(fext, "html") == 0) return render_html(filename);
+  if (strcmp(fext, "html") == 0) return render_html(parse_html(filename));
   else return render_txt(filename);
 }
 
@@ -205,25 +205,39 @@ int render_md(char *filename)
   return 0;
 }
 
-int render_html(char *filename)
+Tags *parse_html(char *filename)
 {
+  Tags *tags = da_heap_alloc(Tags);
   char *content = read_entire_file(filename);
   size_t up = 0;
   while (up != strlen(content) + 1) {
-    Html_Tag tag = consume_tag(content, up);
-    switch (tag.type) {
-      case NONE: {
-        printf("%s", tag.content);
-      } break;
-
-      default {
-        assert(0 && "Unreachable");
+    switch (content[up]) {
+      default: {
+        Html_Tag tag = {0};
+        size_t start = up;
+        while (content[up] != '\0' && content[up] != '<') up++;
+        tag.type = NONE;
+        tag.autocomplete = false;
+        size_t len = up - start;
+        char *ctn = malloc(len + 1);
+        strncpy(ctn, content + start, len);
+        ctn[len] = '\0';
+        tag.content = ctn;
+        da_append(tags, tag);
       } break;
     }
+    up++;
   }
-  putchar('\n');
   free(content);
   content = NULL;
+  return tags;
+}
+
+int render_html(Tags *tags)
+{
+  printf("%s", tags->items[0].content);
+  destroy_tags(tags);
+  da_heap_free(tags);
   return 0;
 }
 

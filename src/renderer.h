@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define CRASH(msg)        \
   do {                    \
@@ -49,10 +50,54 @@ typedef struct {
   bool autocomplete;
 } Html_Tag;
 
-#define consume_tag(content, up)  \
-  do {                            \
- } while (0);                     \
+typedef struct {
+  Html_Tag *items;
+  size_t size;
+  size_t capacity;
+} Tags;
 
-int render_html(char *filename);
+#define DA_INIT_CAPACITY 64
+#define da_heap_alloc(type) (type*) calloc(1, sizeof(type))
+#define da_append(da, item)                                                         \
+  do {                                                                              \
+    if ((da)->size >= (da)->capacity) {                                             \
+      (da)->capacity = (da)->capacity == 0 ? DA_INIT_CAPACITY : (da)->capacity * 2; \
+      (da)->items = realloc((da)->items, (da)->capacity * sizeof(*(da)->items));    \
+      if ((da)->items == NULL) CRASH("buy more ram, lol\n");                        \
+    }                                                                               \
+    (da)->items[(da)->size++] = (item);                                             \
+  } while (0)
+
+#define da_free(da) free((da)->items);
+#define da_heap_free(da)  \
+  do {                    \
+    free((da)->items);    \
+    free(da);             \
+  } while (0)
+
+typedef struct {
+  char *items;
+  size_t size;
+  size_t capacity;
+} CString_Builder;
+
+#define sb_append_str(sb, str)                                                        \
+  do {                                                                                \
+    if ((sb)->size + strlen(str) + 1 >= (sb)->capacity) {                             \
+      while ((sb)->size + strlen(str) + 1>= (sb)->capacity)                           \
+        (sb)->capacity = (sb)->capacity == 0 ? DA_INIT_CAPACITY : (sb)->capacity * 2; \
+      (sb)->items = realloc((sb)->items, (sb)->capacity);                             \
+      if ((sb)->items == NULL) CRASH("buy more ram, lol\n");                          \
+    }                                                                                 \
+    (sb)->size -= (sb)->size == 0 ? 0 : 1;                                            \
+    for (int i = 0; i < strlen(str) + 1; i++)                                         \
+      (sb)->items[(sb)->size++] = str[i];                                             \
+  } while (0)
+
+#define destroy_tag(tag) free((tag)->content);
+#define destroy_tags(tags) for (size_t i = 0; i < (tags)->size; i++) destroy_tag(&(tags)->items[i]); \
+
+Tags *parse_html(char *filename);
+int render_html(Tags *tags);
 
 #endif
