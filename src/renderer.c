@@ -267,6 +267,13 @@ Tags *parse_html(char *filename)
   return tags;
 }
 
+char *str2upr(const char *str)
+{
+  char *upr = malloc(strlen(str) + 1);
+  for (size_t i = 0; i < strlen(str) + 1; i++) upr[i] = toupper(str[i]);
+  return upr;
+}
+
 int render_html(Tags *tags)
 {
   size_t up = 0;
@@ -282,7 +289,10 @@ int render_html(Tags *tags)
         bold();
         while ((tags->items[up].type != HEADER1 || tags->items[up].type != HEADER4) && !tags->items[up].closing) {
           if (tags->items[up].content == NULL) { up++; continue; }
-          printf("%s", tags->items[up++].content);
+          char *str = str2upr(tags->items[up++].content);
+          printf("%s", str);
+          free(str);
+          str = NULL;
         }
         reset();
         up++;
@@ -293,7 +303,10 @@ int render_html(Tags *tags)
         bold();
         while ((tags->items[up].type != HEADER2 || tags->items[up].type != HEADER5) && !tags->items[up].closing) {
           if (tags->items[up].content == NULL) { up++; continue; }
-          printf("%s", tags->items[up++].content);
+          char *str = str2upr(tags->items[up++].content);
+          printf("%s", str);
+          free(str);
+          str = NULL;
         }
         reset();
         up++;
@@ -304,7 +317,10 @@ int render_html(Tags *tags)
         bold();
         while ((tags->items[up].type != HEADER3 || tags->items[up].type != HEADER6) && !tags->items[up].closing) {
           if (tags->items[up].content == NULL) { up++; continue; }
-          printf("%s", tags->items[up++].content);
+          char *str = str2upr(tags->items[up++].content);
+          printf("%s", str);
+          free(str);
+          str = NULL;
         }
         reset();
         up++;

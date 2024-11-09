@@ -108,6 +108,7 @@ typedef struct {
       (sb)->items[(sb)->size++] = str[i];                                             \
   } while (0)
 
+char *str2upr(const char *str);
 Tags *parse_html(char *filename);
 int render_html(Tags *tags);
 
