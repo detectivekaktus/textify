@@ -111,6 +111,7 @@ typedef struct {
   } while (0)
 
 char *str2upr(const char *str);
+void interpret_html_tag(Tags *tags, size_t *up);
 Tags *parse_html(char *filename);
 int render_html(Tags *tags);
 

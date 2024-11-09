@@ -328,10 +328,22 @@ void interpret_html_tag(Tags *tags, size_t *up)
     } break;
 
     case PARAGRAPH: {
+      (*up)++;
       while (tags->items[*up].type != PARAGRAPH && !tags->items[*up].closing) {
         if (tags->items[*up].content == NULL) { (*up)++; continue; }
         printf("%s", tags->items[(*up)++].content);
       }
+      (*up)++;
+    } break;
+
+    case STRONG: {
+      (*up)++;
+      bold();
+      while (tags->items[*up].type != STRONG && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        printf("%s", tags->items[(*up)++].content);
+      }
+      reset();
       (*up)++;
     } break;
 
