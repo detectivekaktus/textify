@@ -212,6 +212,8 @@ const struct Html_Tag_Property props[] = {
   {"h4", HEADER4, true},
   {"h5", HEADER5, true},
   {"h6", HEADER6, true},
+
+  {"p", PARAGRAPH, true}
 };
 
 void resolve_tag(const char *name, Html_Tag *tag)
@@ -242,7 +244,7 @@ Tags *parse_html(char *filename)
 
         Html_Tag tag = {0};
         resolve_tag(str.items, &tag);
-        if (tag.type == UNKNOWN) CRASH("Unknown tag found during parsing.\n");
+        if (tag.type == UNKNOWN) CRASH("Unknown or unsupported tag found during parsing.\n");
         tag.closing = str.items[0] == '/';
         da_append(tags, tag);
         up++;
@@ -323,6 +325,14 @@ int render_html(Tags *tags)
           str = NULL;
         }
         reset();
+        up++;
+      } break;
+
+      case PARAGRAPH: {
+        while (tags->items[up].type != PARAGRAPH && !tags->items[up].closing) {
+          if (tags->items[up].content == NULL) { up++; continue; }
+          printf("%s", tags->items[up++].content);
+        }
         up++;
       } break;
 
