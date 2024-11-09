@@ -213,7 +213,8 @@ const struct Html_Tag_Property props[] = {
   {"h5", HEADER5, true},
   {"h6", HEADER6, true},
 
-  {"p", PARAGRAPH, true}
+  {"p", PARAGRAPH, true},
+  {"strong", STRONG, true}
 };
 
 void resolve_tag(const char *name, Html_Tag *tag)
@@ -276,71 +277,74 @@ char *str2upr(const char *str)
   return upr;
 }
 
+void interpret_html_tag(Tags *tags, size_t *up)
+{
+  switch (tags->items[*up].type) {
+    case NONE: {
+      printf("%s", tags->items[*up].content);
+      (*up)++;
+    } break;
+
+    case HEADER1: case HEADER4: {
+      red();
+      bold();
+      while ((tags->items[*up].type != HEADER1 || tags->items[*up].type != HEADER4) && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        char *str = str2upr(tags->items[(*up)++].content);
+        printf("%s", str);
+        free(str);
+        str = NULL;
+      }
+      reset();
+      (*up)++;
+    } break;
+
+    case HEADER2: case HEADER5: {
+      magenta();
+      bold();
+      while ((tags->items[*up].type != HEADER2 || tags->items[*up].type != HEADER5) && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        char *str = str2upr(tags->items[(*up)++].content);
+        printf("%s", str);
+        free(str);
+        str = NULL;
+      }
+      reset();
+      (*up)++;
+    } break;
+
+    case HEADER3: case HEADER6: {
+      yellow();
+      bold();
+      while ((tags->items[*up].type != HEADER3 || tags->items[*up].type != HEADER6) && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        char *str = str2upr(tags->items[(*up)++].content);
+        printf("%s", str);
+        free(str);
+        str = NULL;
+      }
+      reset();
+      (*up)++;
+    } break;
+
+    case PARAGRAPH: {
+      while (tags->items[*up].type != PARAGRAPH && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        printf("%s", tags->items[(*up)++].content);
+      }
+      (*up)++;
+    } break;
+
+    default: {
+      assert(0 && "Unreachable");
+    } break;
+  }
+}
+
 int render_html(Tags *tags)
 {
   size_t up = 0;
-  while (up != tags->size) {
-    switch (tags->items[up].type) {
-      case NONE: {
-        printf("%s", tags->items[up].content);
-        up++;
-      } break;
-
-      case HEADER1: case HEADER4: {
-        red();
-        bold();
-        while ((tags->items[up].type != HEADER1 || tags->items[up].type != HEADER4) && !tags->items[up].closing) {
-          if (tags->items[up].content == NULL) { up++; continue; }
-          char *str = str2upr(tags->items[up++].content);
-          printf("%s", str);
-          free(str);
-          str = NULL;
-        }
-        reset();
-        up++;
-      } break;
-
-      case HEADER2: case HEADER5: {
-        magenta();
-        bold();
-        while ((tags->items[up].type != HEADER2 || tags->items[up].type != HEADER5) && !tags->items[up].closing) {
-          if (tags->items[up].content == NULL) { up++; continue; }
-          char *str = str2upr(tags->items[up++].content);
-          printf("%s", str);
-          free(str);
-          str = NULL;
-        }
-        reset();
-        up++;
-      } break;
-
-      case HEADER3: case HEADER6: {
-        yellow();
-        bold();
-        while ((tags->items[up].type != HEADER3 || tags->items[up].type != HEADER6) && !tags->items[up].closing) {
-          if (tags->items[up].content == NULL) { up++; continue; }
-          char *str = str2upr(tags->items[up++].content);
-          printf("%s", str);
-          free(str);
-          str = NULL;
-        }
-        reset();
-        up++;
-      } break;
-
-      case PARAGRAPH: {
-        while (tags->items[up].type != PARAGRAPH && !tags->items[up].closing) {
-          if (tags->items[up].content == NULL) { up++; continue; }
-          printf("%s", tags->items[up++].content);
-        }
-        up++;
-      } break;
-
-      default: {
-        assert(0 && "Unreachable");
-      } break;
-    }
-  }
+  while (up != tags->size) interpret_html_tag(tags, &up);
   da_heap_free(tags);
   return 0;
 }
