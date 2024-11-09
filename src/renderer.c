@@ -206,6 +206,7 @@ int render_md(char *filename)
 }
 
 const struct Html_Tag_Property props[] = {
+  {"title", TITLE, true},
   {"h1", HEADER1, true},
   {"h2", HEADER2, true},
   {"h3", HEADER3, true},
@@ -215,13 +216,23 @@ const struct Html_Tag_Property props[] = {
 
   {"p", PARAGRAPH, true},
   {"strong", STRONG, true},
-  {"em", EM, true}
+  {"em", EM, true},
+
+  {"!DOCTYPE html", DOCTYPE, false},
+  {"html", HTML, true},
+  {"head", HEAD, true},
+  {"meta", META, false},
+  {"link", LINK, false},
+  {"script", SCRIPT, false},
+  {"style", STYLE, false},
+  {"body", BODY, true}
 };
 
 void resolve_tag(const char *name, Html_Tag *tag)
 {
   if (name[0] == '/') name++;
   for (size_t i = 0; i < sizeof(props) / sizeof(props[0]); i++) {
+    if (strlen(name) != strlen(props[i].name)) continue;
     if (strcmp(name, props[i].name) == 0) {
       tag->type = props[i].type;
       tag->autocomplete = props[i].autocomplete;
@@ -356,6 +367,18 @@ void interpret_html_tag(Tags *tags, size_t *up)
         printf("%s", tags->items[(*up)++].content);
       }
       reset();
+      (*up)++;
+    } break;
+
+    case DOCTYPE:
+    case HTML:
+    case HEAD:
+    case BODY:
+    case META:
+    case LINK:
+    case SCRIPT:
+    case TITLE:
+    case STYLE: {
       (*up)++;
     } break;
 

@@ -39,12 +39,16 @@ int render_md(char *filename);
 int render_txt(char *filename);
 
 typedef enum {
+  TITLE,
+
   HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
   PARAGRAPH,
   STRONG, EM,
 
   NONE,
-  UNKNOWN
+  UNKNOWN,
+
+  DOCTYPE, HTML, HEAD, META, LINK, SCRIPT, STYLE, BODY
 } Tag_Type;
 
 typedef struct {
