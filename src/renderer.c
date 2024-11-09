@@ -214,7 +214,8 @@ const struct Html_Tag_Property props[] = {
   {"h6", HEADER6, true},
 
   {"p", PARAGRAPH, true},
-  {"strong", STRONG, true}
+  {"strong", STRONG, true},
+  {"em", EM, true}
 };
 
 void resolve_tag(const char *name, Html_Tag *tag)
@@ -340,6 +341,17 @@ void interpret_html_tag(Tags *tags, size_t *up)
       (*up)++;
       bold();
       while (tags->items[*up].type != STRONG && !tags->items[*up].closing) {
+        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        printf("%s", tags->items[(*up)++].content);
+      }
+      reset();
+      (*up)++;
+    } break;
+
+    case EM: {
+      (*up)++;
+      italic();
+      while (tags->items[*up].type != EM && !tags->items[*up].closing) {
         if (tags->items[*up].content == NULL) { (*up)++; continue; }
         printf("%s", tags->items[(*up)++].content);
       }

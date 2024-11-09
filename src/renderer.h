@@ -41,7 +41,7 @@ int render_txt(char *filename);
 typedef enum {
   HEADER1, HEADER2, HEADER3, HEADER4, HEADER5, HEADER6,
   PARAGRAPH,
-  STRONG,
+  STRONG, EM,
 
   NONE,
   UNKNOWN
