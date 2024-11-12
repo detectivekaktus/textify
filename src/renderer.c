@@ -298,10 +298,11 @@ void interpret_html_tag(Tags *tags, size_t *up)
     } break;
 
     case HEADER1: case HEADER4: {
+      (*up)++;
       red();
       bold();
       while ((tags->items[*up].type != HEADER1 || tags->items[*up].type != HEADER4) && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         char *str = str2upr(tags->items[(*up)++].content);
         printf("%s", str);
         free(str);
@@ -312,10 +313,11 @@ void interpret_html_tag(Tags *tags, size_t *up)
     } break;
 
     case HEADER2: case HEADER5: {
+      (*up)++;
       magenta();
       bold();
       while ((tags->items[*up].type != HEADER2 || tags->items[*up].type != HEADER5) && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         char *str = str2upr(tags->items[(*up)++].content);
         printf("%s", str);
         free(str);
@@ -326,10 +328,11 @@ void interpret_html_tag(Tags *tags, size_t *up)
     } break;
 
     case HEADER3: case HEADER6: {
+      (*up)++;
       yellow();
       bold();
       while ((tags->items[*up].type != HEADER3 || tags->items[*up].type != HEADER6) && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         char *str = str2upr(tags->items[(*up)++].content);
         printf("%s", str);
         free(str);
@@ -342,7 +345,7 @@ void interpret_html_tag(Tags *tags, size_t *up)
     case PARAGRAPH: {
       (*up)++;
       while (tags->items[*up].type != PARAGRAPH && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         printf("%s", tags->items[(*up)++].content);
       }
       (*up)++;
@@ -352,7 +355,7 @@ void interpret_html_tag(Tags *tags, size_t *up)
       (*up)++;
       bold();
       while (tags->items[*up].type != STRONG && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         printf("%s", tags->items[(*up)++].content);
       }
       reset();
@@ -363,7 +366,7 @@ void interpret_html_tag(Tags *tags, size_t *up)
       (*up)++;
       italic();
       while (tags->items[*up].type != EM && !tags->items[*up].closing) {
-        if (tags->items[*up].content == NULL) { (*up)++; continue; }
+        if (tags->items[*up].type != NONE) { interpret_html_tag(tags, up); continue; }
         printf("%s", tags->items[(*up)++].content);
       }
       reset();
